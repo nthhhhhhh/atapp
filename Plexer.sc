@@ -18,7 +18,7 @@ https://github.com/nthhisst
 
 Plexer {
 
-    // variables
+
     var grid_64;
     var arc_2;
     var quadrant_I_last_press;
@@ -27,8 +27,7 @@ Plexer {
     var old_event_time_QII;
     var switch;
 
-    // accessors
-    var <>sensitivty;
+    var <>sensitivity;
 
     *new { | your_grid, your_arc |
 
@@ -57,13 +56,9 @@ Plexer {
         // default sensitivty is 4 but can be changed by user
         for(0, 7, { arg column;
 
-            for(0, 3, { arg row;
-                sensitivity[row, column] = 4;
-            });
+            for(0, 3, { arg row; sensitivity[row, column] = 4; });
 
         });
-
-
 
         // ------------------ give each switch it's own knob ------------------
 
@@ -77,8 +72,6 @@ Plexer {
             });
 
         });
-
-
 
         // from (3,0) to (3,2) add Incremental knobs
         for(0,2, { arg column;
@@ -95,18 +88,7 @@ Plexer {
         });
 
         // ---------------------------------------------------------------------
-
-
-
-        /*        arcRouter = { | column, row, knob_n |
-
-        switch[row, column].focus;
-
-        ^ switch[row, column].spin(knob_n, sensitivity[row, column]);
-
-        }*/
-
-
+        switch.at(2,2).postln;
     }
 
     /*
@@ -134,6 +116,8 @@ Plexer {
                 old_event_time_QII = SystemClock.beats;
 
             };
+
+            switch.at(quadrant_II_last_press[1], quadrant_II_last_press[0]).focusKnob(0);
         }
 
         // if top right corner (Quadrant I)
@@ -150,6 +134,8 @@ Plexer {
 
                 old_event_time_QI = SystemClock.beats;
             };
+
+            switch.at(quadrant_I_last_press[1], quadrant_I_last_press[0]).focusKnob(1);
 
         }
 
@@ -173,14 +159,24 @@ Plexer {
 
         if(knob_n == 0)
         {
-            switch[quadrant_I_last_press[1], quadrant_I_last_press[0]].focus;
-            switch[quadrant_I_last_press[1], quadrant_I_last_press[0]].spin(knob_n, delta);
+
+            quadrant_II_last_press.postln;
+            //switch.at(quadrant_II_last_press[1], quadrant_II_last_press[0]).focusKnob(0);
+            //"my button is y:% x:% \n".postf(quadrant_II_last_press[1], quadrant_II_last_press[0]);
+            //switch.at(quadrant_II_last_press[0], quadrant_II_last_press[1]).spin(knob_n, delta);
+            //switch[quadrant_II_last_press[0], quadrant_II_last_press[1]].focusKnob;
+            //switch[quadrant_II_last_press[0]][quadrant_II_last_press[1]].postln;
+            switch.at(quadrant_II_last_press[1], quadrant_II_last_press[0]).spin(knob_n, delta);
         };
 
         if(knob_n == 1)
         {
-            switch[quadrant_II_last_press[1], quadrant_II_last_press[0]].focus;
-            switch[quadrant_II_last_press[1], quadrant_II_last_press[0]].spin(knob_n, delta);
+            quadrant_I_last_press.postln;
+            //switch.at(quadrant_II_last_press[1], quadrant_II_last_press[0]).focusKnob(1);
+            //switch.at(quadrant_I_last_press[0], quadrant_I_last_press[1]).spin(knob_n, delta);
+            //switch.at(quadrant_I_last_press[0],quadrant_I_last_press[1]).focusKnob;
+            //switch[quadrant_I_last_press[0]][quadrant_I_last_press[1]].postln;
+            switch.at(quadrant_I_last_press[1], quadrant_I_last_press[0]).spin(knob_n, delta);
         }
 
     }

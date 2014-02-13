@@ -21,7 +21,6 @@ s.waitForBoot({
         // note: message[1] represents knob_n, message[2] represents delta
         ~pplexer.streamRotation(message[1], message[2]);
 
-
     }, "/arcTwo/enc/delta");
 
 });
@@ -41,4 +40,5 @@ s.waitForBoot({
 (
 ~arcTwo.darkness;
 ~sixtyFour.darkness;
+s.quit;
 )
