@@ -30,9 +30,9 @@ Plexer {
     // accessors
     var <>sensitivty;
 
-    *new { | your_grid |
+    *new { | your_grid, your_arc |
 
-        ^super.new.initPlexer(your_grid);
+        ^super.new.initPlexer(your_grid, your_arc);
 
     }
 
