@@ -28,16 +28,6 @@ s.waitForBoot({
 )
 
 (
-~arcTwo.ringall(0, 0);
-~arcTwo.ringall(1, 0);
-)
-
-(
-~arcTwo.ringall(0, 15);
-~arcTwo.ringall(1, 15);
-)
-
-(
 ~arcTwo.darkness;
 ~sixtyFour.darkness;
 s.quit;
