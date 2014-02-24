@@ -18,16 +18,18 @@ https://github.com/nthhisst
 
 Plexer {
 
+    var grid_64;                           // user's 64
+    var arc_2;                             // user's arc 2
+    var quadrant_I_last_press;             // top right section of 64
+    var quadrant_II_last_press;            // top left section of 64
+    var old_event_time_QI;                 // time stamp for last press in Q1
+    var old_event_time_QII;                // time stamp for last press in Q2
+    var switch;                            // switch 2D array representing buttons in Q1 and Q2
+    var arc_scale_factor;                  // make sure leftmost knob sitting on top of grid is knob 0
+    var midiO;                             // MIDIOut object
 
-    var grid_64;
-    var arc_2;
-    var quadrant_I_last_press;
-    var quadrant_II_last_press;
-    var old_event_time_QI;
-    var old_event_time_QII;
-    var switch;
+    var <>sensitivity;                     // accessor method for sesntivity (array)
 
-    var <>sensitivity;
 
     *new { | your_grid, your_arc |
 
@@ -43,7 +45,7 @@ Plexer {
         quadrant_II_last_press = [3, 0];
         old_event_time_QI = old_event_time_QII = SystemClock.beats;
 
-        // turn off any previously lit leds and
+        // turn off any previously lit leds
         arc_2.ringall(0, 0);
         arc_2.ringall(1, 0);
         grid_64.ledall(0);
@@ -59,6 +61,7 @@ Plexer {
             for(0, 3, { arg row; sensitivity[row, column] = 4; });
 
         });
+
 
         // ------------------ give each switch it's own knob ------------------
 
@@ -88,7 +91,18 @@ Plexer {
         });
 
         // ---------------------------------------------------------------------
-        switch.at(2,2).postln;
+
+
+        MIDIClient.init(1,1);
+        midiO = MIDIOut(0);
+        // example: midiO.control(chan: 1, ctlNum: 7, val: 64);
+
+        arc_scale_factor = 0;
+
+        if(arc_2.rot == 180)
+        {
+            arc_scale_factor = 1;
+        };
     }
 
     /*
@@ -104,7 +118,7 @@ Plexer {
         // if top left corner (Quadrant II)
         case { (column <= 3) and: (row <= 3) }
         {
-            if( (new_event_time - old_event_time_QII) > 0.2 )
+            if( (new_event_time - old_event_time_QII) > 0.15 )
             {
                 if(button_in_YX != quadrant_II_last_press)
                 {
@@ -117,7 +131,9 @@ Plexer {
 
             };
 
-            switch.at(quadrant_II_last_press[1], quadrant_II_last_press[0]).focusKnob(0);
+            switch.at(quadrant_II_last_press[1], quadrant_II_last_press[0]).focusKnob(
+                (0 + arc_scale_factor).wrap(0,1));
+            "supposed knob focused for quadrant II: % \n".postf((0 + arc_scale_factor).wrap(0,1));
         }
 
         // if top right corner (Quadrant I)
@@ -135,7 +151,9 @@ Plexer {
                 old_event_time_QI = SystemClock.beats;
             };
 
-            switch.at(quadrant_I_last_press[1], quadrant_I_last_press[0]).focusKnob(1);
+            switch.at(quadrant_I_last_press[1], quadrant_I_last_press[0]).focusKnob(
+                (1 + arc_scale_factor).wrap(0,1));
+            "supposed knob focused for quadrant II: % \n".postf((1 + arc_scale_factor).wrap(0,1));
 
         }
 
@@ -159,26 +177,30 @@ Plexer {
 
         if(knob_n == 0)
         {
+            //quadrant_II_last_press.postln;
+            // example: midiO.control(chan: 1, ctlNum: 7, val: 64);
 
-            quadrant_II_last_press.postln;
-            //switch.at(quadrant_II_last_press[1], quadrant_II_last_press[0]).focusKnob(0);
-            //"my button is y:% x:% \n".postf(quadrant_II_last_press[1], quadrant_II_last_press[0]);
-            //switch.at(quadrant_II_last_press[0], quadrant_II_last_press[1]).spin(knob_n, delta);
-            //switch[quadrant_II_last_press[0], quadrant_II_last_press[1]].focusKnob;
-            //switch[quadrant_II_last_press[0]][quadrant_II_last_press[1]].postln;
-            switch.at(quadrant_II_last_press[1], quadrant_II_last_press[0]).spin(knob_n, delta);
+            if( arc_2.rot == 180 )
+            {
+                ^ switch.at(quadrant_I_last_press[1], quadrant_I_last_press[0]).spin(knob_n, delta);
+            };
+
+            ^ switch.at(quadrant_II_last_press[1], quadrant_II_last_press[0]).spin(knob_n, delta);
+
+
         };
 
         if(knob_n == 1)
         {
-            quadrant_I_last_press.postln;
-            //switch.at(quadrant_II_last_press[1], quadrant_II_last_press[0]).focusKnob(1);
-            //switch.at(quadrant_I_last_press[0], quadrant_I_last_press[1]).spin(knob_n, delta);
-            //switch.at(quadrant_I_last_press[0],quadrant_I_last_press[1]).focusKnob;
-            //switch[quadrant_I_last_press[0]][quadrant_I_last_press[1]].postln;
-            switch.at(quadrant_I_last_press[1], quadrant_I_last_press[0]).spin(knob_n, delta);
+            if( arc_2.rot == 180 )
+            {
+                ^ switch.at(quadrant_II_last_press[1], quadrant_II_last_press[0]).spin(knob_n, delta);
+            };
+
+            ^ switch.at(quadrant_I_last_press[1], quadrant_I_last_press[0]).spin(knob_n, delta);
         }
 
     }
 
 }
+
