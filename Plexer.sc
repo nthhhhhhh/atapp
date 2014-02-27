@@ -3,9 +3,7 @@
 Makes the top half of a monome 64 behave switches for an arc 2.
 Bottom half are just push buttons. Press is on, release off.
 Classes is intended for atapp (another traktor app) but can be used
-and modified for other generic purposes. throughout this class the
-the coordinates are as followed in comments:
-( column, row )
+and modified for other generic purposes.
 
 for information about monome devices:
 monome.org
@@ -26,7 +24,8 @@ Plexer {
     var old_event_time_QII;                // time stamp for last press in Q2
     var switch;                            // switch 2D array representing buttons in Q1 and Q2
     var arc_scale_factor;                  // make sure leftmost knob sitting on top of grid is knob 0
-    var midiO;                             // MIDIOut object
+    var midi_out;                          // MIDIOut object
+    var midi_ctrl_num;                     // 2D array of MIDI control numbers for grid use
 
     var <>sensitivity;                     // accessor method for sesntivity (array)
 
@@ -38,6 +37,7 @@ Plexer {
     }
 
     initPlexer{ | your_grid, your_arc |
+        var ctrl_number = 50;
 
         grid_64 = your_grid;
         arc_2 = your_arc;
@@ -71,32 +71,48 @@ Plexer {
         for(0, 7, { arg column;
 
             for(0, 2, { arg row;
-                switch[row, column] = ArcKnobAbsolute.new(arc_2, 4);
+                switch[row, column] = ArcRotary.new(arc_2, 4);
             });
 
         });
 
         // from (3,0) to (3,2) add Incremental knobs
         for(0,2, { arg column;
-            switch[3, column] = ArcKnobIncremental.new(arc_2, 4);
+            switch[3, column] = ArcEncoder.new(arc_2, 4);
         });
 
         // two Absolute knobs in the center
-        switch[3,3] = ArcKnobAbsolute.new(arc_2, 4);
-        switch[3,4] = ArcKnobAbsolute.new(arc_2, 4);
+        switch[3,3] = ArcRotary.new(arc_2, 4);
+        switch[3,4] = ArcRotary.new(arc_2, 4);
 
         // make the rest incremental
         for(5, 7, { arg column;
-            switch[3, column] = ArcKnobIncremental(arc_2, 4);
+            switch[3, column] = ArcRotary(arc_2, 4);
         });
 
-        // ---------------------------------------------------------------------
+        // end -----------------------------------------------------------------
 
 
+        // --------------------------- setup MIDI ------------------------------
         MIDIClient.init(1,1);
-        midiO = MIDIOut(0);
+        midi_out = MIDIOut(0);
         // example: midiO.control(chan: 1, ctlNum: 7, val: 64);
+        midi_out.latency_(0);
 
+        midi_ctrl_num = Array2D.new(4, 8);
+
+        for(0, 7, { arg column;
+
+            for(0, 2, { arg row;
+                midi_ctrl_num[row, column] = ctrl_number;
+                ctrl_number = ctrl_number + 1;
+            });
+
+        });
+
+        // end ------------------------------------------------------------------
+
+        // for 180˚ rotation
         arc_scale_factor = 0;
 
         if(arc_2.rot == 180)
@@ -133,7 +149,6 @@ Plexer {
 
             switch.at(quadrant_II_last_press[1], quadrant_II_last_press[0]).focusKnob(
                 (0 + arc_scale_factor).wrap(0,1));
-            "supposed knob focused for quadrant II: % \n".postf((0 + arc_scale_factor).wrap(0,1));
         }
 
         // if top right corner (Quadrant I)
@@ -153,7 +168,6 @@ Plexer {
 
             switch.at(quadrant_I_last_press[1], quadrant_I_last_press[0]).focusKnob(
                 (1 + arc_scale_factor).wrap(0,1));
-            "supposed knob focused for quadrant II: % \n".postf((1 + arc_scale_factor).wrap(0,1));
 
         }
 
@@ -178,15 +192,16 @@ Plexer {
         if(knob_n == 0)
         {
             //quadrant_II_last_press.postln;
-            // example: midiO.control(chan: 1, ctlNum: 7, val: 64);
+            // example: midi_out.control(chan: 1, ctlNum: 7, val: 64);
 
             if( arc_2.rot == 180 )
             {
-                ^ switch.at(quadrant_I_last_press[1], quadrant_I_last_press[0]).spin(knob_n, delta);
+                ^ midi_out.control(0, midi_ctrl_num.at(quadrant_I_last_press[1], quadrant_I_last_press[0]),
+                    switch.at(quadrant_I_last_press[1], quadrant_I_last_press[0]).spin(knob_n, delta).linlin(0, 63, 0, 127));
             };
 
-            ^ switch.at(quadrant_II_last_press[1], quadrant_II_last_press[0]).spin(knob_n, delta);
-
+            //^ switch.at(quadrant_II_last_press[1], quadrant_II_last_press[0]).spin(knob_n, delta);
+           ^ midi_out.control(0, midi_ctrl_num.at(quadrant_II_last_press[1], quadrant_II_last_press[0]), switch.at(quadrant_II_last_press[1], quadrant_II_last_press[0]).spin(knob_n, delta).linlin(0, 63, 0, 127));
 
         };
 
