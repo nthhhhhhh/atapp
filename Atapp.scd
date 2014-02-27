@@ -2,8 +2,8 @@
 s.waitForBoot({
 
     // create monome devices
-    ~sixtyFour = MonoM.new("/sixtyFour", 0);
-    ~arcTwo = Arc.new("/arcTwo", 0);
+    ~sixtyFour = MonoM.new("/sixtyFour", 180);
+    ~arcTwo = Arc.new("/arcTwo", 180);
 
     // the monmome and arc class do not destinguish
     // your device index, use 'yourDevice'.dvcnum.postln
