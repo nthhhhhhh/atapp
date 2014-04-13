@@ -2,8 +2,8 @@
 s.waitForBoot({
 
     // create monome devices
-    ~sixtyFour = MonoM.new("/sixtyFour", 180);
-    ~arcTwo = Arc.new("/arcTwo", 180);
+    ~sixtyFour = MonoM.new("/sixtyFour", 0);
+    ~arcTwo = Arc.new("/arcTwo", 0);
 
     // the monmome and arc class do not destinguish
     // your device index, use 'yourDevice'.dvcnum.postln
@@ -31,6 +31,11 @@ s.waitForBoot({
         ~pplexer.streamRotation(message[1], message[2]);
 
     }, "/arcTwo/enc/delta"); // make sure this line matches with the prefix you defined when creating a Arc object
+
+    MIDIFunc.cc({ arg ccNum, chan,
+
+        ~pplexer.midiIn(ccNum, chan);
+    });
 
 });
 
