@@ -18,15 +18,14 @@ ArcEncoder {
 
     var <>sensitivity;
 
-    *new{ | your_arc, sensitivity_level |
+    *new { | your_arc, sensitivity_level |
 
-        ^super.new.initArcKnob(your_arc, sensitivity_level);
+        ^ super.new.initArcKnob(your_arc, sensitivity_level);
     }
 
     initArcKnob { | your_arc, sensitivity_level |
 
         arc = your_arc;
-
         sensitivity = Array.fill(4, sensitivity_level);
         current_led = Array.fill(4, 0);
         gathered_delta = Array.fill(4, 0);
@@ -38,10 +37,7 @@ ArcEncoder {
             Array.fill(64, 0)
         ];
 
-
         for(0, 3, { arg i; arc_map[i][0] = 15; });
-
-
     }
 
     spin { | knob_n, delta |
@@ -58,8 +54,8 @@ ArcEncoder {
                 arc_map[knob_n][current_led @ knob_n] = 15;
                 gathered_delta[knob_n] = gathered_delta[knob_n] - sensitivity[knob_n];
             };
-
             arc.ringmap(knob_n, arc_map[knob_n]);
+            ^ 127;
         }
 
         { // if it's negative
@@ -74,11 +70,9 @@ ArcEncoder {
                 arc_map[knob_n][current_led @ knob_n] = 15;
                 gathered_delta[knob_n] = gathered_delta[knob_n] - sensitivity[knob_n];
             };
-
             arc.ringmap(knob_n, arc_map[knob_n]);
+            ^ 1;
         };
-
-        ^delta.sign;
     }
 
     focusKnob { | knob_n |

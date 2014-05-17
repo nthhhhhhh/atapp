@@ -1,7 +1,7 @@
 /*
 
 ArcRotary fills leds incrementally up to the current position
-(think of a stack of lit leds) and decrements respectively, returns led position 0-63.
+and decrements respectively, returns led position 0-63.
 
 https://github.com/nthhisst
 
@@ -10,22 +10,11 @@ https://github.com/nthhisst
 
 ArcRotary : ArcEncoder {
 
-
     *new { | your_arc, sensitivity_level |
-
-        ^super.new.initArcRotary(your_arc, sensitivity_level);
+        ^ super.new.initArcRotary(your_arc, sensitivity_level);
     }
 
     initArcRotary { | your_arc, sensitivity_level |
-
-        /*
-        arc = arc;
-        sensitivity = sensitvity_level;
-        arc_map = Array.fill(64, 0);
-
-        gathered_delta = 0;
-        current_led = 0;
-        */
 
         arc = your_arc;
         sensitivity = Array.fill(4, sensitivity_level);
@@ -52,9 +41,8 @@ ArcRotary : ArcEncoder {
                 while{ (gathered_delta[knob_n] >= sensitivity[knob_n]) && (current_led[knob_n] < 63) }
                 {
                     current_led[knob_n] = current_led[knob_n] + 1;
-                    arc_map[knob_n][current_led @ knob_n] = 15;
+                    arc_map[knob_n][current_led @ knob_n] = current_led[knob_n].linlin(0, 63, 2, 15).asInteger;
                     gathered_delta[knob_n] = gathered_delta[knob_n] - sensitivity[knob_n];
-
                 };
 
                 arc.ringmap(knob_n, arc_map[knob_n]);
@@ -63,16 +51,15 @@ ArcRotary : ArcEncoder {
                 {
                     current_led[knob_n] = 63;
 
-                    // constant array for efficiency
                     arc.ringmap(knob_n, #[
-                        15, 15, 15, 15, 15, 15, 15, 15,
-                        15, 15, 15, 15, 15, 15, 15, 15,
-                        15, 15, 15, 15, 15, 15, 15, 15,
-                        15, 15, 15, 15, 15, 15, 15, 15,
-                        15, 15, 15, 15, 15, 15, 15, 15,
-                        15, 15, 15, 15, 15, 15, 15, 15,
-                        15, 15, 15, 15, 15, 15, 15, 15,
-                        15, 15, 15, 15, 15, 15, 15, 15 ]);
+                        15, 2, 2, 2, 2, 3, 3, 3,
+                        3, 3, 4, 4, 4, 4, 4, 5,
+                        5, 5, 5, 5, 6, 6, 6, 6,
+                        6, 7, 7, 7, 7, 7, 8, 8,
+                        8, 8, 9, 9, 9, 9, 9, 10,
+                        10, 10, 10, 10, 11, 11, 11, 11,
+                        11, 12, 12, 12, 12, 12, 13, 13,
+                        13, 13, 13, 14, 14, 14, 14, 15 ]);
 
                     gathered_delta[knob_n] = 0;
 
@@ -107,7 +94,7 @@ ArcRotary : ArcEncoder {
             {
                 gathered_delta[knob_n] = gathered_delta[knob_n] + delta.abs;
 
-                while{ (gathered_delta[knob_n] >= sensitivity[knob_n]) && (current_led[knob_n] >= 0) }
+                while{ (gathered_delta[knob_n] >= sensitivity[knob_n]) && (current_led[knob_n] > 0) }
                 {
                     arc_map[knob_n][current_led @ knob_n] = 0;
                     current_led[knob_n] = current_led[knob_n] - 1;
@@ -116,7 +103,6 @@ ArcRotary : ArcEncoder {
 
                 arc.ringmap(knob_n, arc_map[knob_n]);
             };
-
         };
 
         ^current_led @ knob_n;
