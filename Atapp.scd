@@ -2,8 +2,8 @@
 s.waitForBoot({
 
     // create monome devices
-    ~sixtyFour = MonoM.new("/sixtyFour", 0);
-    ~arcTwo = Arc.new("/arcTwo", 0);
+    ~sixtyFour = MonoM("/sixtyFour", 0);
+    ~arcTwo = Arc("/arcTwo", 0);
 
     // the monmome and arc class do not destinguish
     // your device index, use 'yourDevice'.dvcnum.postln
@@ -14,7 +14,10 @@ s.waitForBoot({
     ~arcTwo.useDevice(1);
 
     // Plexer class takes one grid object and one arc object.
-    ~pplexer = Plexer.new(~sixtyFour, ~arcTwo);
+    ~pplexer = Plexer(~sixtyFour, ~arcTwo);
+
+    // setup MIDI (note: pplexer initializes the midi client, so midiin is connected here)
+    MIDIIn.connect(0);
 
     // grid stream
     OSCFunc.newMatching({ | message |
@@ -32,9 +35,8 @@ s.waitForBoot({
 
     }, "/arcTwo/enc/delta"); // make sure this line matches with the prefix you defined when creating a Arc object
 
-    MIDIFunc.cc({ arg ccNum, chan,
-
-        ~pplexer.midiIn(ccNum, chan);
+    MIDIFunc.cc({ arg value, cc_num;
+        ~pplexer.midiIn(value, cc_num);
     });
 
 });
